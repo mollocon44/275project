@@ -1,4 +1,4 @@
-function varargout = mtsp_ga_multi_ch(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
+function varargout = mtsp_ga_multi_ch_vanilla(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
 % MTSP_GA_MULTI_CH Multiple Traveling Salesmen Problem (M-TSP) Genetic Algorithm (GA) using multi-chromosome representation
 %   Finds a (near) optimal solution to a variation of the M-TSP by setting
 %   up a GA to search for the shortest route, taking into account
@@ -89,10 +89,9 @@ end
 
 merging_prob = 0.3;
 
-%% Verify Inputs
-% Literally just to make sure code didn't go full retard
+% Verify Inputs
 [N,dims] = size(xy);
-[nr,nc] = size(dmat);  %size finds the number of rows and collumns
+[nr,nc] = size(dmat);
 if N ~= nr || N ~= nc
     error('Invalid XY or DMAT inputs!')
 end
@@ -109,9 +108,9 @@ show_res = logical(show_res(1));
 % Initializations for Route Break Point Selection
 num_brks = salesmen-1;
 dof = n - min_tour*salesmen;          % degrees of freedom
-addto = ones(1,dof+1);                % inialize "addto"  as an array of all ones
+addto = ones(1,dof+1);
 for k = 2:num_brks
-    addto = cumsum(addto);       
+    addto = cumsum(addto);
 end
 cum_prob = cumsum(addto)/sum(addto);
 
@@ -154,12 +153,11 @@ penalty_rate = 100;
 start_time = cputime; % get actual time for performance measure
 for iter = 1:num_iter
      % Evaluate Members of the Population
-     % add a function such that add penalty if results are too far away
-     % from eachother
     for p = 1:pop_size
         d = 0;
         for s = 1:length(pop{p}.ch)
             sman = pop{p}.ch{s};
+			d2 = 0;
 			if ~isempty(sman)
 				d2 = d2 + dmat(1,sman(1)) + tw; % Add Start Distance
 				for k = 1:length(sman)-1
@@ -172,7 +170,7 @@ for iter = 1:num_iter
 			end
 			d = d + d2;
         end
-        total_dist(p) = d; %just make this the sum of all the matricies, we can do it)
+        total_dist(p) = d;
     end
 
     % Find the Best Route in the Population
@@ -372,11 +370,11 @@ if nargout
     varargout{5} = dist_history;
 end
 
-%% Generate Random Set of Break Points
+    % Generate Random Set of Break Points
     function breaks = randbreaks()
         if min_tour == 1 % No Constraints on Breaks
-            tmp_brks = randperm(n-1);  %creates random permulation of order of n-1
-            breaks = sort(tmp_brks(1:num_brks)); %organize the first num_breaks elements of tmp_breaks from high to low
+            tmp_brks = randperm(n-1);
+            breaks = sort(tmp_brks(1:num_brks));
         else % Force Breaks to be at Least the Minimum Tour Length
             num_adjust = find(rand < cum_prob,1)-1;
             spaces = ceil(num_brks*rand(1,num_adjust));
@@ -386,9 +384,9 @@ end
             end
             breaks = min_tour*(1:num_brks) + cumsum(adjust);
         end
-    end
+	end
 
-%% One-point crossover
+	% One-point crossover
 	function offsets = crossover_op(parent)
 		% --== CROSSOVER ==--
 		r = randperm(lbestch);
