@@ -193,17 +193,18 @@ for iter = 1:num_iter
         std_sd = std(sd);
         ave_sd = mean(sd);
         total_dist(p) = sum(sd);
+        cost(p) = total_dist(p);
                
-%         if (pd_sd12 > 20)
-%             cost(p) = cost(p) + (pd_sd12-20)*20;
-%         end
-%         if (pd_sd23 > 20)
-%             cost(p) = cost(p) + (pd_sd23-20)*20;
-%         end
-%         if (pd_sd13 > 20)
-%             cost(p) = cost(p) + (pd_sd13-20)*20;
-%         end
-      cost(p) = d;
+        if (pd_sd12 > 20)
+            cost(p) = cost(p) + (pd_sd12-20)*20;
+        end
+        if (pd_sd23 > 20)
+            cost(p) = cost(p) + (pd_sd23-20)*20;
+        end
+        if (pd_sd13 > 20)
+            cost(p) = cost(p) + (pd_sd13-20)*20;
+        end
+%      cost(p) = d;
    end
 
     %% Find the Best Route in the Population
