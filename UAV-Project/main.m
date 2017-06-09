@@ -15,7 +15,7 @@ min_tour = 5;
 max_tour = 100;
 tw = 0; %time window
 pop_size = 80; %size of population
-num_iter = 500; %number of itterations
+num_iter = 1000; %number of itterations
 use_complex = 0;
 show_prog = 1;
 show_res = 1;
@@ -24,7 +24,7 @@ clr = [1 0 0; 0 0 1; 0.67 0 1; 0 1 0; 1 0.5 0];
 
 %% Calling the different algorithms
 [opt_rte_1, min_dist_1, smd_1, dist_history_1] =  mtsp_1(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
-[opt_rte_2, min_dist_2, smd_2, dist_history_2] =  mtsp_2(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
+[opt_rte_2, min_dist_2, smd_2, dist_history_2,total_dist, cost] =  mtsp_3(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
 
 %% Calculating Time/Max Distance traveled by salesman
 time(1) = max(smd_1);

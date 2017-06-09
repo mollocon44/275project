@@ -23,21 +23,28 @@ show_res = 1;
 clr = [1 0 0; 0 0 1; 0.67 0 1; 0 1 0; 1 0.5 0];
 
 %% Calling the different algorithms
-[opt_rte_1, min_dist_1, smd_1, dist_history_1] =  mtsp_1(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
-[opt_rte_2, min_dist_2, smd_2, dist_history_2] =  mtsp_2(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
+[opt_rte_1, min_dist_1, smd_1, dist_history_1,total_dist] =  mtsp_1(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
+[opt_rte_2, min_dist_2, smd_2, dist_history_2,] =  mtsp_2(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
 
 %% Calculating Time/Max Distance traveled by salesman
-time(1) = max(smd_1)
-time(2) = max(smd_2)
+time(1) = max(smd_1);
+time(2) = max(smd_2);
+
+time
 
 %% Plots
+
 %Plot of City Locations
 figure('Name','City Map','NumberTitle','off','Color','white')
 title('City Locations');
 plot(xy(:,1),xy(:,2),'k.')
 
-%Plot of Salesmen Travel 1
 
+%Plot comparing Max travel distance/time
+figure('Name','Time of Travel','NumberTitle','off','Color','white')
+bar(time);
+
+%Plot of Salesmen Travel 1
 figure('Name','Salesman Travel','NumberTitle','off','Color','white')
 subplot(2,1,1);
 for s = 1:salesmen
