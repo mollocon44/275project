@@ -19,7 +19,7 @@ num_iter = 1000; %number of iterations within genetic algorithm
 use_complex = 0;
 show_prog = 1;
 show_res = 1;
-test_iter = 5; %number of times each GA is called
+test_iter = 4; %number of times each GA is called
 
 
 clr = [1 0 0; 0 0 1; 0.67 0 1; 0 1 0; 1 0.5 0];
@@ -40,6 +40,12 @@ for i = 1:test_iter
     
     if i == test_iter
         time
+        fprintf("Average time of single salesman = %1.4f \n", mean(time(:,1)))
+        fprintf("std deviation of time of single salesman = %1.4f \n", std(time(:,1)))
+        fprintf("Average time of multiple salesman with cost function of percent difference = %1.4f \n", mean(time(:,2)))
+        fprintf("std deviation of time of cost function of percent difference = %1.4f \n", std(time(:,2)))
+        fprintf("Average time of cost function of standard deviation = %1.4f \n", mean(time(:,3)))
+        fprintf("std deviation of time of standard deviation = %1.4f \n", std(time(:,3)))
     end
 
     %% Plots
@@ -53,7 +59,7 @@ for i = 1:test_iter
 
     %Plot comparing Max travel distance/time
     figure('Name','Time of Travel','NumberTitle','off','Color','white')
-    bar(time(i,3));
+    bar(time);
 
     %Plot of Salesmen for cost(total distance)
     figure('Name','Salesman Travel','NumberTitle','off','Color','white')
