@@ -1,5 +1,5 @@
-function [opt_rte, min_dist, smd, dist_history] = mtsp_ga_multi_ch(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
-%mofos made it a function
+function [opt_rte, min_dist, smd, dist_history] = mtsp_tour(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
+%Optimizes for minimum longest tour. 
 
 % MTSP_GA_MULTI_CH Multiple Traveling Salesmen Problem (M-TSP) Genetic Algorithm (GA) using multi-chromosome representation
 %   Finds a (near) optimal solution to a variation of the M-TSP by setting

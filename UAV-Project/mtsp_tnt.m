@@ -1,5 +1,7 @@
-function [opt_rte, min_dist, smd, dist_history] = mtsp_ga_multi_ch(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
-%mofos made it a function
+function [opt_rte, min_dist, smd, dist_history, st_i] = mtsp_tnt(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
+%Minimizes total dist + longest tour length
+
+% st_i is index of salesman with the longest tour, used for plotting
 
 % MTSP_GA_MULTI_CH Multiple Traveling Salesmen Problem (M-TSP) Genetic Algorithm (GA) using multi-chromosome representation
 %   Finds a (near) optimal solution to a variation of the M-TSP by setting
@@ -61,36 +63,36 @@ function [opt_rte, min_dist, smd, dist_history] = mtsp_ga_multi_ch(xy,dmat,sales
 
 
 %% Process Inputs and Initialize Defaults
-nargs = 11;
-for k = nargin:nargs-1
-    switch k %%% this is the absolute least intuitive way to set this up
-        case 0
-            xy = 40*rand(40,2); %generates 40 random inputs
-        case 1
-            N = size(xy,1); %map of locations
-            a = meshgrid(1:N); %make a grid
-            dmat = reshape(sqrt(sum((xy(a,:)-xy(a',:)).^2,2)),N,N);  %creates symetric cost matrix, the diagonol is zeroes
-        case 2
-            salesmen = 3;
-        case 3
-            min_tour = 5;
-		case 4
-            max_tour = 100;
-		case 5
-            tw = 0;
-        case 6
-            pop_size = 80;
-        case 7
-            num_iter = 1000;
-        case 8
-            use_complex = 0;
-		case 9
-            show_prog = 1;
-        case 10
-            show_res = 1;
-        otherwise
-    end
-end
+% nargs = 11;
+% for k = nargin:nargs-1
+%     switch k %%% this is the absolute least intuitive way to set this up
+%         case 0
+%             xy = 40*rand(40,2); %generates 40 random inputs
+%         case 1
+%             N = size(xy,1); %map of locations
+%             a = meshgrid(1:N); %make a grid
+%             dmat = reshape(sqrt(sum((xy(a,:)-xy(a',:)).^2,2)),N,N);  %creates symetric cost matrix, the diagonol is zeroes
+%         case 2
+%             salesmen = 3;
+%         case 3
+%             min_tour = 5;
+% 		case 4
+%             max_tour = 100;
+% 		case 5
+%             tw = 0;
+%         case 6
+%             pop_size = 80;
+%         case 7
+%             num_iter = 1000;
+%         case 8
+%             use_complex = 0;
+% 		case 9
+%             show_prog = 1;
+%         case 10
+%             show_res = 1;
+%         otherwise
+%     end
+% end
 
 merging_prob = 0.3;
 

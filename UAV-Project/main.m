@@ -25,7 +25,10 @@ clr = [1 0 0; 0 0 1; 0.67 0 1; 0 1 0; 1 0.5 0];
 %% Calling the different algorithms
 [opt_rte_1, min_dist_1, smd_1, dist_history_1] =  mtsp_1(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
 [opt_rte_2, min_dist_2, smd_2, dist_history_2,total_dist, cost] =  mtsp_3(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
+%tnt == tour and total optimization
 [opt_rte_tnt, min_dist_tnt, smd_tnt, dist_history_tnt] =  mtsp_tnt(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
+%tour == longest tour length optimization
+[opt_rte_tour, min_dist_tour, smd_tour, dist_history_tour] =  mtsp_tour(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
 
 %% Calculating Time/Max Distance traveled by salesman
 time(1) = max(smd_1);
