@@ -1,5 +1,5 @@
-function [opt_rte, min_dist, smd, dist_history, total_dist, cost] = mtsp_ga_multi_ch_2(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
-% Cost Function is from percent difference
+function [opt_rte, min_dist, smd, dist_history, total_dist, cost] = mtsp_total_distance(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
+%Cost is only a function of total distance
 
 % MTSP_GA_MULTI_CH Multiple Traveling Salesmen Problem (M-TSP) Genetic Algorithm (GA) using multi-chromosome representation
 %   Finds a (near) optimal solution to a variation of the M-TSP by setting
@@ -58,37 +58,6 @@ function [opt_rte, min_dist, smd, dist_history, total_dist, cost] = mtsp_ga_mult
 
 
 %% Process Inputs and Initialize Defaults
-nargs = 11;
-% for k = nargin:nargs-1
-%     switch k
-%         case 0
-%             xy = 40*rand(40,2); 
-%         case 1
-%             N = size(xy,1); %map of locations
-%             a = meshgrid(1:N); %make a grid
-%             dmat = reshape(sqrt(sum((xy(a,:)-xy(a',:)).^2,2)),N,N);  %creates symetric cost matrix, the diagonol is zeroes
-%         case 2
-%             salesmen = 3;
-%         case 3
-%             min_tour = 5;
-% 		case 4
-%             max_tour = 100;
-% 		case 5
-%             tw = 0;
-%         case 6
-%             pop_size = 80;
-%         case 7
-%             num_iter = 500;
-%         case 8
-%             use_complex = 0;
-% 		case 9
-%             show_prog = 1;
-%         case 10
-%             show_res = 1;
-%         otherwise
-%     end
-% end
-
 merging_prob = 0.3;
 
 %% Verify Inputs
@@ -101,8 +70,6 @@ end
 n = N - 1; % Separate Start/End City
 
 % Sanity Checks
-salesmen = 3;
-% salesmen = max(1,min(n,round(real(salesmen(1)))));
 min_tour = max(1,min(floor(n/salesmen),round(real(min_tour(1)))));
 pop_size = max(8,8*ceil(pop_size(1)/8));
 num_iter = max(1,round(real(num_iter(1))));
@@ -194,17 +161,6 @@ for iter = 1:num_iter
         ave_sd = mean(sd);
         total_dist(p) = sum(sd);
         cost(p) = total_dist(p);
-               
-        if (pd_sd12 > 20)
-            cost(p) = cost(p) + (pd_sd12-20)*20;
-        end
-        if (pd_sd23 > 20)
-            cost(p) = cost(p) + (pd_sd23-20)*20;
-        end
-        if (pd_sd13 > 20)
-            cost(p) = cost(p) + (pd_sd13-20)*20;
-        end
-%      cost(p) = d;
    end
 
     %% Find the Best Route in the Population

@@ -1,5 +1,5 @@
-function [opt_rte, min_dist, smd, dist_history, total_dist, cost] = mtsp_ga_multi_ch_2(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
-% Cost Function is from percent difference
+function [opt_rte, min_dist, smd, dist_history, total_dist, cost] = mtsp_std_dev(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
+% Cost Function is from from standard deviations
 
 % MTSP_GA_MULTI_CH Multiple Traveling Salesmen Problem (M-TSP) Genetic Algorithm (GA) using multi-chromosome representation
 %   Finds a (near) optimal solution to a variation of the M-TSP by setting
@@ -193,18 +193,8 @@ for iter = 1:num_iter
         std_sd = std(sd);
         ave_sd = mean(sd);
         total_dist(p) = sum(sd);
-        cost(p) = total_dist(p);
-               
-        if (pd_sd12 > 20)
-            cost(p) = cost(p) + (pd_sd12-20)*20;
-        end
-        if (pd_sd23 > 20)
-            cost(p) = cost(p) + (pd_sd23-20)*20;
-        end
-        if (pd_sd13 > 20)
-            cost(p) = cost(p) + (pd_sd13-20)*20;
-        end
-%      cost(p) = d;
+        cost(p) = total_dist(p)+std_sd*salesmen;
+
    end
 
     %% Find the Best Route in the Population
