@@ -1,4 +1,4 @@
-function [opt_rte, min_dist, smd, dist_history] = mtsp_tour(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
+function [opt_rte, min_dist, smd, dist_history, lt_i] = mtsp_tour(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
 %Optimizes for minimum longest tour. 
 
 % MTSP_GA_MULTI_CH Multiple Traveling Salesmen Problem (M-TSP) Genetic Algorithm (GA) using multi-chromosome representation
@@ -190,6 +190,7 @@ for iter = 1:num_iter
             end
             if (d2 > max_tour_length)
                 max_tour_length = d2;
+                lt_i = s; %longest tour index
             end
             d = d + d2; 
         end

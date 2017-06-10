@@ -1,7 +1,7 @@
-function [opt_rte, min_dist, smd, dist_history, st_i] = mtsp_tnt(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
+function [opt_rte, min_dist, smd, dist_history, lt_i] = mtsp_tnt(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
 %Minimizes total dist + longest tour length
 
-% st_i is index of salesman with the longest tour, used for plotting
+% lt_i is index of salesman with the longest tour, used for plotting
 
 % MTSP_GA_MULTI_CH Multiple Traveling Salesmen Problem (M-TSP) Genetic Algorithm (GA) using multi-chromosome representation
 %   Finds a (near) optimal solution to a variation of the M-TSP by setting
@@ -63,36 +63,36 @@ function [opt_rte, min_dist, smd, dist_history, st_i] = mtsp_tnt(xy,dmat,salesme
 
 
 %% Process Inputs and Initialize Defaults
-% nargs = 11;
-% for k = nargin:nargs-1
-%     switch k %%% this is the absolute least intuitive way to set this up
-%         case 0
-%             xy = 40*rand(40,2); %generates 40 random inputs
-%         case 1
-%             N = size(xy,1); %map of locations
-%             a = meshgrid(1:N); %make a grid
-%             dmat = reshape(sqrt(sum((xy(a,:)-xy(a',:)).^2,2)),N,N);  %creates symetric cost matrix, the diagonol is zeroes
-%         case 2
-%             salesmen = 3;
-%         case 3
-%             min_tour = 5;
-% 		case 4
-%             max_tour = 100;
-% 		case 5
-%             tw = 0;
-%         case 6
-%             pop_size = 80;
-%         case 7
-%             num_iter = 1000;
-%         case 8
-%             use_complex = 0;
-% 		case 9
-%             show_prog = 1;
-%         case 10
-%             show_res = 1;
-%         otherwise
-%     end
-% end
+nargs = 11;
+for k = nargin:nargs-1
+    switch k %%% this is the absolute least intuitive way to set this up
+        case 0
+            xy = 40*rand(40,2); %generates 40 random inputs
+        case 1
+            N = size(xy,1); %map of locations
+            a = meshgrid(1:N); %make a grid
+            dmat = reshape(sqrt(sum((xy(a,:)-xy(a',:)).^2,2)),N,N);  %creates symetric cost matrix, the diagonol is zeroes
+        case 2
+            salesmen = 3;
+        case 3
+            min_tour = 5;
+		case 4
+            max_tour = 100;
+		case 5
+            tw = 0;
+        case 6
+            pop_size = 80;
+        case 7
+            num_iter = 1000;
+        case 8
+            use_complex = 0;
+		case 9
+            show_prog = 1;
+        case 10
+            show_res = 1;
+        otherwise
+    end
+end
 
 merging_prob = 0.3;
 
@@ -113,7 +113,7 @@ pop_size = max(8,8*ceil(pop_size(1)/8));
 num_iter = max(1,round(real(num_iter(1))));
 show_prog = logical(show_prog(1));
 show_res = logical(show_res(1));
-change_clrs = 0;
+change_clrs = 1;
 change_clrs = logical(change_clrs(1));
 
 % Initializations for Route Break Point Selection
@@ -198,7 +198,7 @@ for iter = 1:num_iter
             end
             if (d2 > max_tour_length)
                 max_tour_length = d2;
-                lt_i = s; %longest tour index
+                lt_i(p) = s; %longest tour index
             end
             d = d + d2;
             
@@ -242,9 +242,9 @@ for iter = 1:num_iter
                 %going, which makes the display a little dizzying
                 clrs = [clr_3;clr_2;clr_1];
                 if change_clrs
-                    if lt_i == 1
+                    if lt_i(index) == 1
                         clrs = [clr_1;clr_2;clr_3];
-                    elseif lt_i == 2
+                    elseif lt_i(index) == 2
                         clrs = [clr_2;clr_1;clr_3];
                     end
                 end
@@ -419,9 +419,9 @@ if show_res
         rte = [1 opt_rte.ch{s} 1];
         clrs = [clr_3;clr_2;clr_1];
         if change_clrs
-            if lt_i == 1
+            if lt_i(index) == 1
                 clrs = [clr_1;clr_2;clr_3];
-            elseif lt_i == 2
+            elseif lt_i(index) == 2
                 clrs = [clr_2;clr_1;clr_3];
             end
         end
