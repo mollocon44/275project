@@ -111,6 +111,8 @@ pop_size = max(8,8*ceil(pop_size(1)/8));
 num_iter = max(1,round(real(num_iter(1))));
 show_prog = logical(show_prog(1));
 show_res = logical(show_res(1));
+change_clrs = 0;
+change_clrs = logical(change_clrs(1));
 
 % Initializations for Route Break Point Selection
 num_brks = salesmen-1;
@@ -131,9 +133,9 @@ end
 
 % Select the Colors for the Plotted Routes
 clr = [1 0 0; 0 0 1; 0.67 0 1; 0 1 0; 1 0.5 0];
-clr_best = [1 0 0];
-clr_2 = [0 0 1];
-clr_3 = [0.67 0 1];
+clr_1 = [1 0 0]; %longest
+clr_2 = [0 0 1]; %second longest
+clr_3 = [0.67 0 1]; %third
 
 % if salesmen > 5
 %     clr = hsv(salesmen);
@@ -194,8 +196,10 @@ for iter = 1:num_iter
             end
             if (d2 > max_tour_length)
                 max_tour_length = d2;
+                lt_i = s; %longest tour index
             end
-            d = d + d2; 
+            d = d + d2;
+            
         end
         
         % what do these lines do? taking percent difference of different
@@ -232,10 +236,20 @@ for iter = 1:num_iter
             figure(pfig);
             for s = 1:salesmen
                 rte = [1 opt_rte.ch{s} 1];
+                %change_clrs determines whether to change colors as we're
+                %going, which makes the display a little dizzying
+                clrs = [clr_3;clr_2;clr_1];
+                if change_clrs
+                    if lt_i == 1
+                        clrs = [clr_1;clr_2;clr_3];
+                    elseif lt_i == 2
+                        clrs = [clr_2;clr_1;clr_3];
+                    end
+                end
                 if dims == 3, 
-                    plot3(xy(rte,1),xy(rte,2),xy(rte,3),'.-','Color',clr(s,:));
+                    plot3(xy(rte,1),xy(rte,2),xy(rte,3),'.-','Color',clrs(s,:));
                 else
-                    plot(xy(rte,1),xy(rte,2),'.-','Color',clr(s,:));
+                    plot(xy(rte,1),xy(rte,2),'.-','Color',clrs(s,:));
                 end
                 title(sprintf('Longest Tour = %1.4f, Iteration = %d',lowest_cost_tour,iter));
                 hold on
@@ -401,8 +415,16 @@ if show_res
     subplot(2,2,3);
     for s = 1:salesmen
         rte = [1 opt_rte.ch{s} 1];
-        if dims == 3, plot3(xy(rte,1),xy(rte,2),xy(rte,3),'.-','Color',clr(s,:));
-        else plot(xy(rte,1),xy(rte,2),'.-','Color',clr(s,:)); end
+        clrs = [clr_3;clr_2;clr_1];
+        if change_clrs
+            if lt_i == 1
+                clrs = [clr_1;clr_2;clr_3];
+            elseif lt_i == 2
+                clrs = [clr_2;clr_1;clr_3];
+            end
+        end
+        if dims == 3, plot3(xy(rte,1),xy(rte,2),xy(rte,3),'.-','Color',clrs(s,:));
+        else plot(xy(rte,1),xy(rte,2),'.-','Color',clrs(s,:)); end
         title(sprintf('Longest Tour = %1.4f',lowest_cost_tour));
         hold on;
     end
