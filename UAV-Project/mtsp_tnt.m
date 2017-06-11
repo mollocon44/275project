@@ -1,4 +1,4 @@
-function [opt_rte, min_cost, max_tour_len, smd, dist_history, lt_i] = mtsp_tnt(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
+function [opt_rte, opt_out, soln_history, history, smd] = mtsp_tnt(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
 %Minimizes total dist + longest tour length
 
 % lt_i is index of salesman with the longest tour, used for plotting
@@ -96,6 +96,9 @@ end
 %comment section above here to use with main
 
 merging_prob = 0.3;
+%dist_history = zeros(num_iter);
+longest_tour_history = zeros(num_iter);
+lt_i_history = zeros(num_iter);
 
 %% Verify Inputs
 % Literally just to make sure code didn't go full retard
@@ -180,6 +183,7 @@ for iter = 1:num_iter
     for p = 1:pop_size % THIS LOOP GOES THROUGH EACH SOLUTION OF THE POPULATION
         d = 0;
         max_tour_length = 0; %this is keeping track of the length of the longest tour
+        
         for s = 1:length(pop{p}.ch) %START ITERATING THROUGH SALESMEN IN A SINGLE SOLUTION
             sman = pop{p}.ch{s}; %% what is sman -> salesman's tour
 			d2 = 0; 
@@ -218,17 +222,19 @@ for iter = 1:num_iter
         ave_sd = mean(sd);
         total_dist(p) = sum(sd);
         longest_tour(p) = max_tour_length;
-        cost(p) = total_dist(p) + max_tour_length;
+        s_cost(p) = total_dist(p) + max_tour_length;
     end %ENDS POPULATION ITERATION
 
     %% Find the Best Route in the Population
-    [min_cost,index] = min(cost); %%% now edited to find minimum longest tour, not min total distance
-    dist_history(iter) = total_dist(index);
-    longest_tour_history(iter) = longest_tour(index);
+    [min_cost,index] = min(s_cost); %%% now edited to find minimum longest tour, not min total distance
+    
     if min_cost < global_min
         global_min = min_cost; % the optimal solution so far
         opt_rte = pop{index}; % the best solution so far
         opt_time = cputime - start_time; % compute the elapsed time
+        opt_ltour = longest_tour(index); %store best tour length
+        opt_dist = total_dist(index); %store best tour total dist travelled
+        opt_lt_i = lt_i(index); % store best salesman
         opt_iter = iter; % store the iteration number
 		
         % The row below was only needed when the system tried to optimize
@@ -269,12 +275,17 @@ for iter = 1:num_iter
             hold off
         end
     end
+    soln_history{iter} = opt_rte;
+    dist_history(iter) = opt_dist;
+    longest_tour_history(iter) = opt_ltour;
+    lt_i_history(iter) = opt_lt_i;
+    %cost_history(iter) = s_cost(index);
 
     %% Genetic Algorithm Operators
     rand_grouping = randperm(pop_size);
     for p = 8:8:pop_size
         rpop    = pop(rand_grouping(p-7:p));
-        dists   = cost(rand_grouping(p-7:p));
+        dists   = s_cost(rand_grouping(p-7:p));
         [ignore,idx] = min(dists);%#ok
         best_of_8 = rpop{idx};
 		best_of_8.ch(:,cellfun(@(c) isempty(c), best_of_8.ch)) = [];
@@ -404,8 +415,32 @@ for iter = 1:num_iter
 end
 %This is the end of the iterative process
 
+%% Package outputs
+
+opt_out(1) = opt_ltour;
+opt_out(2) = opt_dist;
+opt_out(3) = opt_lt_i;
+opt_out(4) = opt_iter;
+
+history{1} = longest_tour_history;
+history{2} = dist_history;
+history{3} = lt_i_history;
+
+
+% orig. output opt_rte, min_dist, smd, dist_history, 
+% now want opt_rte, , opt_ltour, opt_lt_i, smd, dist_history,
+% longest_tour_history, cost_history;
+%         opt_rte = pop{index}; % the best solution so far
+%         opt_time = cputime - start_time; % compute the elapsed time
+%         opt_ltour = longest_tour(index); %store best tour length
+%         opt_dist = total_dist(index); %store best tour total dist travelled
+%         opt_lt_i = lt_i(index); % store best salesman
+%         opt_iter = iter; % store the iteration number
+
 
 %% Plot Stuff
+
+
 if show_res
     % Plots
     figure('Name','MTSPF_GA | Results','Numbertitle','off');
@@ -417,19 +452,20 @@ if show_res
     imagesc(dmat([1 opt_rte.ch{:}],[1 opt_rte.ch{:}]));
     title('Distance Matrix');
     subplot(2,2,3);
+    
+    %make the longest tour red
+    clrs = [clr_3;clr_2;clr_1];   
+    if opt_lt_i == 1
+        clrs = [clr_1;clr_2;clr_3];
+    elseif opt_lt_i == 2
+        clrs = [clr_2;clr_1;clr_3];
+    end
+    
     for s = 1:salesmen
         rte = [1 opt_rte.ch{s} 1];
-        clrs = [clr_3;clr_2;clr_1];
-        if change_clrs
-            if lt_i(index) == 1
-                clrs = [clr_1;clr_2;clr_3];
-            elseif lt_i(index) == 2
-                clrs = [clr_2;clr_1;clr_3];
-            end
-        end
         if dims == 3, plot3(xy(rte,1),xy(rte,2),xy(rte,3),'.-','Color',clrs(s,:));
         else plot(xy(rte,1),xy(rte,2),'.-','Color',clrs(s,:)); end
-        title(sprintf('Longest Tour = %1.4f',lowest_cost_tour));
+        title(sprintf('Longest Tour = %1.4f', opt_ltour));
         hold on;
     end
     if dims == 3, plot3(xy(1,1),xy(1,2),xy(1,3),'ko');
@@ -450,17 +486,6 @@ end
      end
      smd(i) = smd(i) + dmat(sm_city_visit(end),1);
  end
-         
-             
-
-% Return Outputs
-% if nargout
-%     varargout{1} = opt_rte;
-%     varargout{2} = min_dist;
-%     varargout{3} = opt_iter;
-%     varargout{4} = opt_time;
-%     varargout{5} = dist_history;
-% end
 
 %% Generate Random Set of Break Points
     function breaks = randbreaks()
