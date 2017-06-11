@@ -1,4 +1,4 @@
-function [opt_rte, opt_out, soln_history, history, smd] = mtsp_tnt(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
+function [opt_rte, opt_out, soln_history, history, smd] = mtsp_tnt(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res,change_clrs)
 %Minimizes total dist + longest tour length
 
 % lt_i is index of salesman with the longest tour, used for plotting
@@ -197,9 +197,9 @@ for iter = 1:num_iter
                 sd(s) = sd(s) + dmat(sman(end),1); %and we're ending at our depot
 				d2 = d2 + dmat(sman(end),1); % Add End Distance 
 				
-                if (d2 > max_tour) % max_tour is max allowed tour length
-					d2 = d2 + (d2 - max_tour) * penalty_rate;
-                end
+%                 if (d2 > max_tour) % max_tour is max allowed tour length
+% 					d2 = d2 + (d2 - max_tour) * penalty_rate;
+%                 end
                 
             end
             if (d2 > max_tour_length)
@@ -234,7 +234,7 @@ for iter = 1:num_iter
         opt_time = cputime - start_time; % compute the elapsed time
         opt_ltour = longest_tour(index); %store best tour length
         opt_dist = total_dist(index); %store best tour total dist travelled
-        opt_lt_i = lt_i(index); % store best salesman
+        opt_lt_i = lt_i(index); % store best salesman index
         opt_iter = iter; % store the iteration number
 		
         % The row below was only needed when the system tried to optimize
