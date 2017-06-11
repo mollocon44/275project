@@ -1,4 +1,4 @@
-function [opt_rte, min_dist, smd, dist_history, lt_i] = mtsp_tnt(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
+function [opt_rte, min_cost, max_tour_len, smd, dist_history, lt_i] = mtsp_tnt(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
 %Minimizes total dist + longest tour length
 
 % lt_i is index of salesman with the longest tour, used for plotting
@@ -93,6 +93,7 @@ for k = nargin:nargs-1
         otherwise
     end
 end
+%comment section above here to use with main
 
 merging_prob = 0.3;
 
@@ -135,8 +136,8 @@ end
 
 % Select the Colors for the Plotted Routes
 clr = [1 0 0; 0 0 1; 0.67 0 1; 0 1 0; 1 0.5 0];
-clr_1 = [1 0 0]; %longest
-clr_2 = [0 0 1]; %second longest
+clr_1 = [1 0 0]; %longest=red
+clr_2 = [0 0 1]; %second (not actually keeping track of length of other routes)
 clr_3 = [0.67 0 1]; %third
 
 % if salesmen > 5
@@ -173,12 +174,13 @@ penalty_rate = 100;
 start_time = cputime; % get actual time for performance measure
 for iter = 1:num_iter
     %% Evaluate Members of the Population
-    %Anything commented out here is pretty much from the original code
+    
     % p === current solution out of population
-    for p = 1:pop_size
+    lt_i = zeros(pop_size);
+    for p = 1:pop_size % THIS LOOP GOES THROUGH EACH SOLUTION OF THE POPULATION
         d = 0;
         max_tour_length = 0; %this is keeping track of the length of the longest tour
-        for s = 1:length(pop{p}.ch)
+        for s = 1:length(pop{p}.ch) %START ITERATING THROUGH SALESMEN IN A SINGLE SOLUTION
             sman = pop{p}.ch{s}; %% what is sman -> salesman's tour
 			d2 = 0; 
 			if ~isempty(sman)
@@ -187,22 +189,22 @@ for iter = 1:num_iter
 				for k = 1:length(sman)-1 % why not the last salesman tour leg? I know we've removed our depot node, but shouldn't we still finish the whole tour?
                     sd(s) = sd(s) + dmat(sman(k),sman(k+1)) + tw;
  					d2 = d2 + dmat(sman(k),sman(k+1)) + tw;
-                end
-                sd(s) = sd(s) + dmat(sman(end),1);
-				d2 = d2 + dmat(sman(end),1); % Add End Distance
+                end %We've now just summed the salesman tour length
+                sd(s) = sd(s) + dmat(sman(end),1); %and we're ending at our depot
+				d2 = d2 + dmat(sman(end),1); % Add End Distance 
 				
-                if (d2 > max_tour) % max_tour is max allowed tour
+                if (d2 > max_tour) % max_tour is max allowed tour length
 					d2 = d2 + (d2 - max_tour) * penalty_rate;
                 end
                 
             end
             if (d2 > max_tour_length)
                 max_tour_length = d2;
-                lt_i(p) = s; %longest tour index
+                lt_i(p) = s; %longest tour index; p is solution number
             end
             d = d + d2;
             
-        end
+        end %ENDS ITERATING TROUGH SALESMEN
         
         % what do these lines do? taking percent difference of different
         % salesmen's distances? -- this is done for each member of the population in the
@@ -217,14 +219,14 @@ for iter = 1:num_iter
         total_dist(p) = sum(sd);
         longest_tour(p) = max_tour_length;
         cost(p) = total_dist(p) + max_tour_length;
-   end
+    end %ENDS POPULATION ITERATION
 
     %% Find the Best Route in the Population
-    [min_dist,index] = min(cost); %%% now edited to find minimum longest tour, not min total distance
-    dist_history(iter) = min_dist;
-    lowest_cost_tour = longest_tour(index);
-    if min_dist < global_min
-        global_min = min_dist; % the optimal solution so far
+    [min_cost,index] = min(cost); %%% now edited to find minimum longest tour, not min total distance
+    dist_history(iter) = total_dist(index);
+    longest_tour_history(iter) = longest_tour(index);
+    if min_cost < global_min
+        global_min = min_cost; % the optimal solution so far
         opt_rte = pop{index}; % the best solution so far
         opt_time = cputime - start_time; % compute the elapsed time
         opt_iter = iter; % store the iteration number
@@ -253,7 +255,7 @@ for iter = 1:num_iter
                 else
                     plot(xy(rte,1),xy(rte,2),'.-','Color',clrs(s,:));
                 end
-                title(sprintf('Longest Tour = %1.4f, Iteration = %d',lowest_cost_tour,iter));
+                title(sprintf('Longest Tour = %1.4f, Distance = %1.4f, Iteration = %d',longest_tour(index),total_dist(index),iter));
                 hold on
             end
             if dims == 3,
