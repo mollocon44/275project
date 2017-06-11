@@ -41,20 +41,6 @@ function [opt_rte, min_dist, smd, dist_history, total_dist, cost] = mtsp_std_dev
 %     OPT_ITER (scalar int) is the number of iterations until the optimal solution has been found
 %	  OPT_TIME (scalar float) is the time in milliseconds until the optimal solution has been found
 %     DIST_HISTORY (float array) is the history of distances of best found solutions
-%
-% Authors: Andras Kiraly, Janos Abonyi
-% Email: kiralya@fmt.uni-pannon.hu
-% Release Date: 16/10/2014
-% The implementation is based on the work of Joseph Kirk: mtspf_ga
-%
-% *************************************************************************
-% --== Reference notice ==--
-% If you use this implementation in your work, please cite out paper:
-%
-% Andras Kiraly, Janos Abonyi: Redesign of the Supply of Mobile Mechanics 
-% based on a novel Genetic Optimization Algorithm using Google Maps API. 
-% Engineering Applications of Artificial Intelligence, 2014.
-% *************************************************************************
 
 
 %% Process Inputs and Initialize Defaults
