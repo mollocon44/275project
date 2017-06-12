@@ -1,4 +1,4 @@
-function [opt_rte, opt_out, soln_history, history, smd] = mtsp_tour(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
+function [opt_rte, smd, dist_history] = mtsp_tour(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
 %Optimizes for minimum longest tour. 
 % NOTE: Not adjusted for color organization
 
@@ -95,8 +95,6 @@ function [opt_rte, opt_out, soln_history, history, smd] = mtsp_tour(xy,dmat,sale
 %comment out above this for integration with main
 
 merging_prob = 0.3;
-longest_tour_history = zeros(num_iter);
-lt_i_history = zeros(num_iter);
 
 %% Verify Inputs
 % Literally just to make sure code didn't go full retard
@@ -269,7 +267,6 @@ for iter = 1:num_iter
 %         end
 %     end %end live plotting
     
-    soln_history{iter} = opt_rte;
     dist_history(iter) = opt_dist;
     longest_tour_history(iter) = opt_ltour;
     lt_i_history(iter) = opt_lt_i;
@@ -408,18 +405,16 @@ for iter = 1:num_iter
 end
 %This is the end of the iterative process
 
-%% Package outputs
-% opt_out is the final sol'n info
-opt_out(1) = opt_ltour;
-opt_out(2) = opt_dist;
-opt_out(3) = opt_lt_i;
-opt_out(4) = opt_iter;
-%history is the best sol'n so far for each iteration
-history{1} = longest_tour_history;
-history{2} = dist_history;
-history{3} = lt_i_history;
-
-%now output is [opt_rte, opt_out, soln_history, history, smd]
+%% Package outputs - Now Obsolete!
+% % opt_out is the final sol'n info
+% opt_out(1) = opt_ltour;
+% opt_out(2) = opt_dist;
+% opt_out(3) = opt_lt_i;
+% opt_out(4) = opt_iter;
+% %history is the best sol'n so far for each iteration
+% history{1} = longest_tour_history;
+% history{2} = dist_history;
+% history{3} = lt_i_history;
 
 
 %% Plot Stuff

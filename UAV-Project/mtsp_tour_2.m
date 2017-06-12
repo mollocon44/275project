@@ -1,7 +1,6 @@
-function [opt_rte, opt_out, soln_history, history, smd] = mtsp_tnt(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
-%Minimizes total dist + longest tour length
-
-% lt_i is index of salesman with the longest tour, used for plotting
+function [opt_rte, smd, dist_history] = mtsp_tour_2(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
+%Optimizes for minimum longest tour. 
+% NOTE: Not adjusted for color organization
 
 % MTSP_GA_MULTI_CH Multiple Traveling Salesmen Problem (M-TSP) Genetic Algorithm (GA) using multi-chromosome representation
 %   Finds a (near) optimal solution to a variation of the M-TSP by setting
@@ -62,7 +61,7 @@ function [opt_rte, opt_out, soln_history, history, smd] = mtsp_tnt(xy,dmat,sales
 % *************************************************************************
 
 
-%% Process Inputs and Initialize Defaults
+% %% Process Inputs and Initialize Defaults
 nargs = 11;
 for k = nargin:nargs-1
     switch k %%% this is the absolute least intuitive way to set this up
@@ -93,10 +92,9 @@ for k = nargin:nargs-1
         otherwise
     end
 end
-%comment section above here to use with main
+%comment out above this for integration with main
 
 merging_prob = 0.3;
-%dist_history = zeros(num_iter);
 longest_tour_history = zeros(num_iter);
 lt_i_history = zeros(num_iter);
 
@@ -117,8 +115,6 @@ pop_size = max(8,8*ceil(pop_size(1)/8));
 num_iter = max(1,round(real(num_iter(1))));
 show_prog = logical(show_prog(1));
 show_res = logical(show_res(1));
-change_clrs = 1;
-change_clrs = logical(change_clrs(1));
 
 % Initializations for Route Break Point Selection
 num_brks = salesmen-1;
@@ -139,10 +135,6 @@ end
 
 % Select the Colors for the Plotted Routes
 clr = [1 0 0; 0 0 1; 0.67 0 1; 0 1 0; 1 0.5 0];
-clr_1 = [1 0 0]; %longest=red
-clr_2 = [0 0 1]; %second (not actually keeping track of length of other routes)
-clr_3 = [0.67 0 1]; %third
-
 % if salesmen > 5
 %     clr = hsv(salesmen);
 % end
@@ -177,14 +169,14 @@ penalty_rate = 100;
 start_time = cputime; % get actual time for performance measure
 for iter = 1:num_iter
     %% Evaluate Members of the Population
-    
+    %Anything commented out here is pretty much from the original code
     % p === current solution out of population
     lt_i = zeros(pop_size);
-    for p = 1:pop_size % THIS LOOP GOES THROUGH EACH SOLUTION OF THE POPULATION
+    for p = 1:pop_size %CYCLING THROUGH SOL'NS IN THE POPULATION
         d = 0;
-        max_tour_length = 0; %this is keeping track of the length of the longest tour
-        
-        for s = 1:length(pop{p}.ch) %START ITERATING THROUGH SALESMEN IN A SINGLE SOLUTION
+        max_tour_length = 0; %this is keeping track of the length of the longest tour in this particular sol'n p
+       
+        for s = 1:length(pop{p}.ch)
             sman = pop{p}.ch{s}; %% what is sman -> salesman's tour
 			d2 = 0; 
 			if ~isempty(sman)
@@ -193,22 +185,21 @@ for iter = 1:num_iter
 				for k = 1:length(sman)-1 % why not the last salesman tour leg? I know we've removed our depot node, but shouldn't we still finish the whole tour?
                     sd(s) = sd(s) + dmat(sman(k),sman(k+1)) + tw;
  					d2 = d2 + dmat(sman(k),sman(k+1)) + tw;
-                end %We've now just summed the salesman tour length
-                sd(s) = sd(s) + dmat(sman(end),1); %and we're ending at our depot
-				d2 = d2 + dmat(sman(end),1); % Add End Distance 
-				
-                if (d2 > max_tour) % max_tour is max allowed tour length
-					d2 = d2 + (d2 - max_tour) * penalty_rate;
                 end
+                sd(s) = sd(s) + dmat(sman(end),1);
+				d2 = d2 + dmat(sman(end),1); % Add End Distance
+				
+%                 if (d2 > max_tour) % max_tour is max allowed tour
+% 					d2 = d2 + (d2 - max_tour) * penalty_rate;
+%                 end
                 
             end
             if (d2 > max_tour_length)
                 max_tour_length = d2;
-                lt_i(p) = s; %longest tour index; p is solution number
+                lt_i(p) = s; %longest tour index
             end
-            d = d + d2;
-            
-        end %ENDS ITERATING TROUGH SALESMEN
+            d = d + d2; 
+        end
         
         % what do these lines do? taking percent difference of different
         % salesmen's distances? -- this is done for each member of the population in the
@@ -221,47 +212,49 @@ for iter = 1:num_iter
         std_sd = std(sd);
         ave_sd = mean(sd);
         total_dist(p) = sum(sd);
-        longest_tour(p) = max_tour_length;
-        s_cost(p) = total_dist(p) + max_tour_length;
-    end %ENDS POPULATION ITERATION
+        longest_tour(p) = max_tour_length; %for THAT SOLUTION
+        
+        
+        % what the hell is the point of this
+        if (pd_sd12 > 20)
+            total_dist(p) = total_dist(p) + (pd_sd12-20)*20;
+        end
+        if (pd_sd23 > 20)
+            total_dist(p) = total_dist(p) + (pd_sd23-20)*20;
+        end
+        if (pd_sd13 > 20)
+            total_dist(p) = total_dist(p) + (pd_sd13-20)*20;
+        end
+%      total_dist(p) = d;
+   end
 
     %% Find the Best Route in the Population
-    [min_cost,index] = min(s_cost); %%% now edited to find minimum longest tour, not min total distance
-    
-    if min_cost < global_min
-        global_min = min_cost; % the optimal solution so far
+    [min_dist,index] = min(longest_tour); %%% now edited to find minimum longest tour, not min total distance
+
+    if min_dist < global_min
+        global_min = min_dist; % the optimal solution so far, optimized for longest tour only
         opt_rte = pop{index}; % the best solution so far
         opt_time = cputime - start_time; % compute the elapsed time
         opt_ltour = longest_tour(index); %store best tour length
         opt_dist = total_dist(index); %store best tour total dist travelled
-        opt_lt_i = lt_i(index); % store best salesman
+        opt_lt_i = lt_i(index); % store best salesman index
         opt_iter = iter; % store the iteration number
 		
-        % The row below was only needed when the system tried to optimize
+        % The row bellow was only needed when the system tried to optimize
         % for the best salesmen number, but we say fuck it
         %salesmen = sum(cellfun(@(x) length(x), opt_rte.ch) > 0);  
         
-        if show_prog
-            % Plot the Best Route
+        if show_prog %begin live plotting
+            % Plot the Best Route (so far)
             figure(pfig);
             for s = 1:salesmen
                 rte = [1 opt_rte.ch{s} 1];
-                %change_clrs determines whether to change colors as we're
-                %going, which makes the display a little dizzying
-                clrs = [clr_3;clr_2;clr_1];
-                if change_clrs
-                    if lt_i(index) == 1
-                        clrs = [clr_1;clr_2;clr_3];
-                    elseif lt_i(index) == 2
-                        clrs = [clr_2;clr_1;clr_3];
-                    end
-                end
                 if dims == 3, 
-                    plot3(xy(rte,1),xy(rte,2),xy(rte,3),'.-','Color',clrs(s,:));
+                    plot3(xy(rte,1),xy(rte,2),xy(rte,3),'.-','Color',clr(s,:));
                 else
-                    plot(xy(rte,1),xy(rte,2),'.-','Color',clrs(s,:));
+                    plot(xy(rte,1),xy(rte,2),'.-','Color',clr(s,:));
                 end
-                title(sprintf('Longest Tour = %1.4f, Distance = %1.4f, Iteration = %d',longest_tour(index),total_dist(index),iter));
+                title(sprintf('Longest Tour = %1.4f, Iteration = %d',min_dist,iter));
                 hold on
             end
             if dims == 3,
@@ -274,20 +267,20 @@ for iter = 1:num_iter
             end
             hold off
         end
-    end
+    end %end live plotting
+    
     soln_history{iter} = opt_rte;
     dist_history(iter) = opt_dist;
     longest_tour_history(iter) = opt_ltour;
     lt_i_history(iter) = opt_lt_i;
-    %cost_history(iter) = s_cost(index);
 
     %% Genetic Algorithm Operators
     rand_grouping = randperm(pop_size);
     for p = 8:8:pop_size
         rpop    = pop(rand_grouping(p-7:p));
-        dists   = s_cost(rand_grouping(p-7:p));
+        dists   = longest_tour(rand_grouping(p-7:p)); %takes out the longest tour lengths for my random group
         [ignore,idx] = min(dists);%#ok
-        best_of_8 = rpop{idx};
+        best_of_8 = rpop{idx}; %now it's got the best sol'n from that rand grp of 8
 		best_of_8.ch(:,cellfun(@(c) isempty(c), best_of_8.ch)) = [];
         
         for k = 1:8 % Generate New Solutions
@@ -415,32 +408,7 @@ for iter = 1:num_iter
 end
 %This is the end of the iterative process
 
-%% Package outputs
-
-opt_out(1) = opt_ltour;
-opt_out(2) = opt_dist;
-opt_out(3) = opt_lt_i;
-opt_out(4) = opt_iter;
-
-history{1} = longest_tour_history;
-history{2} = dist_history;
-history{3} = lt_i_history;
-
-
-% orig. output opt_rte, min_dist, smd, dist_history, 
-% now want opt_rte, , opt_ltour, opt_lt_i, smd, dist_history,
-% longest_tour_history, cost_history;
-%         opt_rte = pop{index}; % the best solution so far
-%         opt_time = cputime - start_time; % compute the elapsed time
-%         opt_ltour = longest_tour(index); %store best tour length
-%         opt_dist = total_dist(index); %store best tour total dist travelled
-%         opt_lt_i = lt_i(index); % store best salesman
-%         opt_iter = iter; % store the iteration number
-
-
 %% Plot Stuff
-
-
 if show_res
     % Plots
     figure('Name','MTSPF_GA | Results','Numbertitle','off');
@@ -452,20 +420,11 @@ if show_res
     imagesc(dmat([1 opt_rte.ch{:}],[1 opt_rte.ch{:}]));
     title('Distance Matrix');
     subplot(2,2,3);
-    
-    %make the longest tour red
-    clrs = [clr_3;clr_2;clr_1];   
-    if opt_lt_i == 1
-        clrs = [clr_1;clr_2;clr_3];
-    elseif opt_lt_i == 2
-        clrs = [clr_2;clr_1;clr_3];
-    end
-    
     for s = 1:salesmen
         rte = [1 opt_rte.ch{s} 1];
-        if dims == 3, plot3(xy(rte,1),xy(rte,2),xy(rte,3),'.-','Color',clrs(s,:));
-        else plot(xy(rte,1),xy(rte,2),'.-','Color',clrs(s,:)); end
-        title(sprintf('Longest Tour = %1.4f', opt_ltour));
+        if dims == 3, plot3(xy(rte,1),xy(rte,2),xy(rte,3),'.-','Color',clr(s,:));
+        else plot(xy(rte,1),xy(rte,2),'.-','Color',clr(s,:)); end
+        title(sprintf('Longest Tour = %1.4f',opt_ltour));
         hold on;
     end
     if dims == 3, plot3(xy(1,1),xy(1,2),xy(1,3),'ko');
@@ -486,6 +445,17 @@ end
      end
      smd(i) = smd(i) + dmat(sm_city_visit(end),1);
  end
+         
+             
+
+% Return Outputs
+% if nargout
+%     varargout{1} = opt_rte;
+%     varargout{2} = min_dist;
+%     varargout{3} = opt_iter;
+%     varargout{4} = opt_time;
+%     varargout{5} = dist_history;
+% end
 
 %% Generate Random Set of Break Points
     function breaks = randbreaks()
