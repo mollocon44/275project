@@ -16,11 +16,14 @@ use_complex = 0;
 show_prog = 1;
 show_res = 0;
 test_iter = 3; %number of times each GA is called
-map_iter = 5; %number of maps tested
+map_iter = 2; %number of maps tested
 num_algos = 5; % number of algos
 clr = [1 0 0; 0 0 1; 0.67 0 1; 0 1 0; 1 0.5 0];
 algo_type = char('Single','Percent Difference', 'Std. Dev.', 'Longest Salesman Route', 'Longest Salesman and Total Route');
 
+aMS = 6; %average Marker Size
+aLW = 1.4; %average line width
+sp = 0.5; %spacing factor for averages
 %% Parameters
 for j = 1:map_iter
     
@@ -74,6 +77,7 @@ for j = 1:map_iter
             t_a4 = time(j,:, 4);
             t_a5 = time(j,:, 5);
             
+            %at = linspace(1,map_iter
             ave_time(j,1) = mean(t_a1);
             ave_time(j,2) = mean(t_a2);
             ave_time(j,3) = mean(t_a3);
@@ -81,16 +85,39 @@ for j = 1:map_iter
             ave_time(j,5) = mean(t_a5);
             
             %effin colors won't work, no idea why
-            plot (t,t_a1,'m.',...
-                 t,t_a2,'r.', ...
-                 t,t_a3,'g.',...'MarkerEdgeColor',[0 0 0], ...
-                 t,t_a4,'.b', ...'Color',clr(4,:), ...
-                 t,t_a5,'k.'); % 'Color',clr(5,:));
+            plot (t,t_a1,'mo',...
+                 'MarkerSize', 3,...
+                 'MarkerFaceColor', 'm');
+            hold on;
+            plot (t,t_a2,'ro', ...
+                 'MarkerSize', 3,...
+                 'MarkerFaceColor', 'r');
+            hold on;
+            plot (t,t_a3,'go',...'MarkerEdgeColor',[0 0 0], ...
+                 'MarkerSize', 3,...
+                 'MarkerFaceColor', 'g');
+            hold on;
+            plot (t,t_a4,'bo', ...'Color',clr(4,:), ...
+                 'MarkerSize', 3,...
+                 'MarkerFaceColor', 'b');
+            hold on;
+            plot (t,t_a5,'ko',... % 'Color',clr(5,:));
+                 'MarkerSize', 3,...
+                 'MarkerFaceColor', 'k');
             set(gca, 'XLim', [0 map_iter+1], 'XTick' , 1:map_iter);
             xlabel('Map Number');
             ylabel('Time');
             legend(algo_type);
             title('Time For Each Algorithms solution')
+            hold on;
+            %plot the averages as asterisks
+            
+            plot (j,ave_time(j,1), 'ms','MarkerSize', aMS,'LineWidth',aLW);
+            plot (j+0.08*sp,ave_time(j,2), 'rs','MarkerSize', aMS,'LineWidth',aLW);
+            plot (j-0.08*sp,ave_time(j,3), 'gs','MarkerSize', aMS,'LineWidth',aLW);
+            plot (j+0.18*sp,ave_time(j,4), 'bs','MarkerSize', aMS,'LineWidth',aLW);
+            plot (j-0.18*sp,ave_time(j,5), 'ks','MarkerSize', aMS,'LineWidth',aLW);
+           
             hold on;
             
             %% Mega Plot Std Dev
@@ -107,7 +134,7 @@ for j = 1:map_iter
             ave_std(j,5) = mean(std_a5);
 %             
 %             %effin colors won't work, no idea why
-%             plot (t,std_a1,'m.',...
+%             plot (t,std_a1,'mo',...
 %                  t,std_a2,'r.', ...
 %                  t,std_a3,'g.',...'MarkerEdgeColor',[0 0 0], ...
 %                  t,std_a4,'.b', ...'Color',clr(4,:), ...
