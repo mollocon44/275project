@@ -16,6 +16,7 @@ use_complex = 0;
 show_prog = 1;
 show_res = 1;
 test_iter = 2; %number of times each GA is called
+
 map_iter = 2; %number of maps tested
 %% Parameters
 for j : 1:map_iter
@@ -25,16 +26,6 @@ for j : 1:map_iter
     N = size(xy,1); %map of locations
     a = meshgrid(1:N); %make a grid
     dmat = reshape(sqrt(sum((xy(a,:)-xy(a',:)).^2,2)),N,N);  %creates symetric cost matrix, the diagonol is zeroes
-    salesmen = 3;
-    min_tour = 0;
-    max_tour = 2000;
-    tw = 0; %time window
-    pop_size = 80; %size of population
-    num_iter = 1000; %number of iterations within genetic algorithm
-    use_complex = 0;
-    show_prog = 1;
-    show_res = 1;
-    test_iter = 1; %number of times each GA is called
 
 
     clr = [1 0 0; 0 0 1; 0.67 0 1; 0 1 0; 1 0.5 0];
@@ -55,6 +46,29 @@ for j : 1:map_iter
         time(i,2) = max(smd_pd);
         time(i,3) = max(smd_std);
 
+
+%% Run throught the code a ton of freaking time
+for i = 1:test_iter
+    %% Calling the different algorithms
+    [opt_rte_td, min_dist_td, dist_history_td] =  tsp_ga(xy,dmat,pop_size, num_iter);
+    [opt_rte_pd, smd_pd, dist_history_pd] =  mtsp_percent_diff(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
+    [opt_rte_std, smd_std, dist_history_std] =  mtsp_std_dev(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
+    [opt_rte_t, smd_t, dist_history_t] = mtsp_tour_2(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
+    [opt_rte_tnt, smd_tnt, dist_history_tnt] = mtsp_tnt(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
+
+    %[opt_rte_tnt, min_dist_tnt, smd_tnt, dist_history_tnt] =  mtsp_tnt(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);  
+    %% Calculating Time/Max Distance traveled by salesman
+    
+    time(i,1) = min_dist_td; % i is index of test of that specific map
+    time(i,2) = max(smd_pd);
+    time(i,3) = max(smd_std);
+    
+    
+    min_dist_pd(i) = min(dist_history_pd);
+    min_dist_std(i) = min(dist_history_std);    
+    
+    if i == test_iter
+        time
         ave(1) = mean(time(:,1));
         ave(2) = mean(time(:,2));
         ave(3) = mean(time(:,3));
