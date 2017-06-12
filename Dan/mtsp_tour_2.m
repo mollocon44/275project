@@ -145,9 +145,7 @@ tmp_pop_8       = cell(1,8);
 new_pop         = cell(1,pop_size);
 total_dist      = zeros(1,pop_size);
 dist_history    = zeros(1,num_iter);
-if show_prog
-    pfig = figure('Name','MTSPF_GA | Current Best Solution','Numbertitle','off');
-end
+
 
 %% ----=== TARNSFORMATION --> multiple chromosome [BEGIN] ===----
 % this is where a populations matrix gets dividided into multiple
