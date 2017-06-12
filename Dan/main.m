@@ -11,8 +11,8 @@ N = size(xy,1); %map of locations
 a = meshgrid(1:N); %make a grid
 dmat = reshape(sqrt(sum((xy(a,:)-xy(a',:)).^2,2)),N,N);  %creates symetric cost matrix, the diagonol is zeroes
 salesmen = 3;
-min_tour = 5;
-max_tour = 100;
+min_tour = 0;
+max_tour = 2000;
 tw = 0; %time window
 pop_size = 80; %size of population
 num_iter = 1000; %number of iterations within genetic algorithm
@@ -29,8 +29,8 @@ clr = [1 0 0; 0 0 1; 0.67 0 1; 0 1 0; 1 0.5 0];
 for i = 1:test_iter
     %% Calling the different algorithms
     [opt_rte_td, min_dist_td, dist_history_td] =  tsp_ga(xy,dmat,pop_size, num_iter);
-    [opt_rte_pd, min_dist_pd, smd_pd, dist_history_pd, total_dist_pd, cost_pd] =  mtsp_percent_diff(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
-    [opt_rte_std, min_dist_std, smd_std, dist_history_std, total_dist_std, cost_std] =  mtsp_std_dev(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
+    [opt_rte_pd, smd_pd, dist_history_pd] =  mtsp_percent_diff(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
+    [opt_rte_std, smd_std, dist_history_std] =  mtsp_std_dev(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
 
     %[opt_rte_tnt, min_dist_tnt, smd_tnt, dist_history_tnt] =  mtsp_tnt(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);  
     %% Calculating Time/Max Distance traveled by salesman
@@ -47,7 +47,8 @@ for i = 1:test_iter
     std_dev(2) = std(time(:,2));
     std_dev(3) = std(time(:,3));
     
-    
+    min_dist_pd(i) = min(dist_history_pd);
+    min_dist_std(i) = min(dist_history_std);    
     
     if i == test_iter
         time
@@ -93,7 +94,7 @@ for i = 1:test_iter
     for s = 1:salesmen
             rte = [1 opt_rte_pd.ch{s} 1];
             plot(xy(rte,1),xy(rte,2),'.-','Color',clr(s,:));
-            title(sprintf('Total Distance for cost(percent difference) = %1.4f',min_dist_pd));
+            title(sprintf('Total Distance for cost(percent difference) = %1.4f',min_dist_pd(i)));
             hold on;
     end
 
@@ -102,7 +103,7 @@ for i = 1:test_iter
     for s = 1:salesmen
             rte = [1 opt_rte_pd.ch{s} 1];
             plot(xy(rte,1),xy(rte,2),'.-','Color',clr(s,:));
-            title(sprintf('Total Distance for cost(standard deviation) = %1.4f',min_dist_std));
+            title(sprintf('Total Distance for cost(standard deviation) = %1.4f',min_dist_std(i)));
             hold on;
     end
 

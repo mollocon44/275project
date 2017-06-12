@@ -1,4 +1,4 @@
-function [opt_rte, min_dist, smd, dist_history, total_dist, cost] = mtsp_total_distance(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
+function [opt_rte, smd, dist_history] = mtsp_total_distance(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
 %Cost is only a function of total distance
 
 % MTSP_GA_MULTI_CH Multiple Traveling Salesmen Problem (M-TSP) Genetic Algorithm (GA) using multi-chromosome representation
