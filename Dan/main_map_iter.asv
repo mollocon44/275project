@@ -11,13 +11,13 @@ min_tour = 0;
 max_tour = 2000;
 tw = 0; %time window
 pop_size = 80; %size of population
-num_iter = 500; %number of iterations within genetic algorithm
+num_iter = 50; %number of iterations within genetic algorithm
 use_complex = 0;
 show_prog = 1;
 show_res = 0;
 test_iter = 3; %number of times each GA is called
-map_iter = 10; %number of maps tested
-num_algos = 10; % number of algos
+map_iter = 3; %number of maps tested
+num_algos = 5; % number of algos
 clr = [1 0 0; 0 0 1; 0.67 0 1; 0 1 0; 1 0.5 0];
 algo_type = char('Single','Percent Difference', 'Std. Dev.', 'Longest Salesman Route', 'Longest Salesman and Total Route');
 
@@ -70,11 +70,10 @@ for j = 1:map_iter
             a5 = time(j,:, 5);
             t = j*ones(1,test_iter); %city visited
             
-            %effin colors won't work, no idea why
             plot (t,a1,'m.',...
                  t,a2,'r.', ...
                  t,a3,'g.',...'MarkerEdgeColor',[0 0 0], ...
-                 t,a4,'.', ...'Color',clr(4,:), ...
+                 t,a4,'.','Color',clr(4,:), ...
                  t,a5,'k.'); % 'Color',clr(5,:));
             set(gca, 'XLim', [0 map_iter+1], 'XTick' , 1:map_iter);
             xlabel('Map Number');
