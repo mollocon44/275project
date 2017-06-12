@@ -1,4 +1,4 @@
-function [opt_rte, smd, dist_history] = mtsp_tour(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
+function [opt_rte, smd, dist_history] = mtsp_tour_2(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
 %Optimizes for minimum longest tour. 
 % NOTE: Not adjusted for color organization
 
@@ -62,39 +62,41 @@ function [opt_rte, smd, dist_history] = mtsp_tour(xy,dmat,salesmen,min_tour,max_
 
 
 % %% Process Inputs and Initialize Defaults
-% nargs = 11;
-% for k = nargin:nargs-1
-%     switch k %%% this is the absolute least intuitive way to set this up
-%         case 0
-%             xy = 40*rand(40,2); %generates 40 random inputs
-%         case 1
-%             N = size(xy,1); %map of locations
-%             a = meshgrid(1:N); %make a grid
-%             dmat = reshape(sqrt(sum((xy(a,:)-xy(a',:)).^2,2)),N,N);  %creates symetric cost matrix, the diagonol is zeroes
-%         case 2
-%             salesmen = 3;
-%         case 3
-%             min_tour = 5;
-% 		case 4
-%             max_tour = 100;
-% 		case 5
-%             tw = 0;
-%         case 6
-%             pop_size = 80;
-%         case 7
-%             num_iter = 1000;
-%         case 8
-%             use_complex = 0;
-% 		case 9
-%             show_prog = 1;
-%         case 10
-%             show_res = 1;
-%         otherwise
-%     end
-% end
+nargs = 11;
+for k = nargin:nargs-1
+    switch k %%% this is the absolute least intuitive way to set this up
+        case 0
+            xy = 40*rand(40,2); %generates 40 random inputs
+        case 1
+            N = size(xy,1); %map of locations
+            a = meshgrid(1:N); %make a grid
+            dmat = reshape(sqrt(sum((xy(a,:)-xy(a',:)).^2,2)),N,N);  %creates symetric cost matrix, the diagonol is zeroes
+        case 2
+            salesmen = 3;
+        case 3
+            min_tour = 5;
+		case 4
+            max_tour = 100;
+		case 5
+            tw = 0;
+        case 6
+            pop_size = 80;
+        case 7
+            num_iter = 1000;
+        case 8
+            use_complex = 0;
+		case 9
+            show_prog = 1;
+        case 10
+            show_res = 1;
+        otherwise
+    end
+end
 %comment out above this for integration with main
 
 merging_prob = 0.3;
+longest_tour_history = zeros(num_iter);
+lt_i_history = zeros(num_iter);
 
 %% Verify Inputs
 % Literally just to make sure code didn't go full retard
@@ -242,31 +244,32 @@ for iter = 1:num_iter
         % for the best salesmen number, but we say fuck it
         %salesmen = sum(cellfun(@(x) length(x), opt_rte.ch) > 0);  
         
-%         if show_prog %begin live plotting
-%             % Plot the Best Route (so far)
-%             figure(pfig);
-%             for s = 1:salesmen
-%                 rte = [1 opt_rte.ch{s} 1];
-%                 if dims == 3, 
-%                     plot3(xy(rte,1),xy(rte,2),xy(rte,3),'.-','Color',clr(s,:));
-%                 else
-%                     plot(xy(rte,1),xy(rte,2),'.-','Color',clr(s,:));
-%                 end
-%                 title(sprintf('Longest Tour = %1.4f, Iteration = %d',min_dist,iter));
-%                 hold on
-%             end
-%             if dims == 3,
-%                 plot3(xy(1,1),xy(1,2),xy(1,3),'ko');
-%             else
-%                 plot(xy(1,1),xy(1,2),'ko'); 
-%             end
-%             if mod(num_iter,50) == 0 
-%                 pause(0.1)
-%             end
-%             hold off
-%         end
-%     end %end live plotting
+        if show_prog %begin live plotting
+            % Plot the Best Route (so far)
+            figure(pfig);
+            for s = 1:salesmen
+                rte = [1 opt_rte.ch{s} 1];
+                if dims == 3, 
+                    plot3(xy(rte,1),xy(rte,2),xy(rte,3),'.-','Color',clr(s,:));
+                else
+                    plot(xy(rte,1),xy(rte,2),'.-','Color',clr(s,:));
+                end
+                title(sprintf('Longest Tour = %1.4f, Iteration = %d',min_dist,iter));
+                hold on
+            end
+            if dims == 3,
+                plot3(xy(1,1),xy(1,2),xy(1,3),'ko');
+            else
+                plot(xy(1,1),xy(1,2),'ko'); 
+            end
+            if mod(num_iter,50) == 0 
+                pause(0.1)
+            end
+            hold off
+        end
+    end %end live plotting
     
+    soln_history{iter} = opt_rte;
     dist_history(iter) = opt_dist;
     longest_tour_history(iter) = opt_ltour;
     lt_i_history(iter) = opt_lt_i;
@@ -404,18 +407,6 @@ for iter = 1:num_iter
     pop = new_pop;
 end
 %This is the end of the iterative process
-
-%% Package outputs - Now Obsolete!
-% % opt_out is the final sol'n info
-% opt_out(1) = opt_ltour;
-% opt_out(2) = opt_dist;
-% opt_out(3) = opt_lt_i;
-% opt_out(4) = opt_iter;
-% %history is the best sol'n so far for each iteration
-% history{1} = longest_tour_history;
-% history{2} = dist_history;
-% history{3} = lt_i_history;
-
 
 %% Plot Stuff
 if show_res
