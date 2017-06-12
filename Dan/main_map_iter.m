@@ -11,13 +11,13 @@ min_tour = 0;
 max_tour = 2000;
 tw = 0; %time window
 pop_size = 80; %size of population
-num_iter = 500; %number of iterations within genetic algorithm
+num_iter = 80; %number of iterations within genetic algorithm
 use_complex = 0;
 show_prog = 1;
 show_res = 0;
 test_iter = 3; %number of times each GA is called
-map_iter = 10; %number of maps tested
-num_algos = 10; % number of algos
+map_iter = 5; %number of maps tested
+num_algos = 5; % number of algos
 clr = [1 0 0; 0 0 1; 0.67 0 1; 0 1 0; 1 0.5 0];
 algo_type = char('Single','Percent Difference', 'Std. Dev.', 'Longest Salesman Route', 'Longest Salesman and Total Route');
 
@@ -51,6 +51,12 @@ for j = 1:map_iter
         time(j,i,4) = max(smd_t);
         time(j,i,5) = max(smd_tnt);
         
+        std_dev(j,i,1) = std(smd_td);
+        std_dev(j,i,2) = std(smd_pd);
+        std_dev(j,i,3) = std(smd_std);
+        std_dev(j,i,4) = std(smd_t);
+        std_dev(j,i,5) = std(smd_tnt);
+        
         %molly's old code, its hard to create a legend for, also weird
 %         %failure for  increasing test_iter
 %         for k = 1:num_algos
@@ -59,27 +65,63 @@ for j = 1:map_iter
 %         end
         
     end
-            %% MEGA PLOT
-     % for the civilized man
-
-        %for k = 1:num_algos
-            a1 = time(j,:, 1);
-            a2 = time(j,:, 2);
-            a3 = time(j,:, 3);
-            a4 = time(j,:, 4);
-            a5 = time(j,:, 5);
+    
+    %% MEGA PLOT Time
             t = j*ones(1,test_iter); %city visited
+            t_a1 = time(j,:, 1);
+            t_a2 = time(j,:, 2);
+            t_a3 = time(j,:, 3);
+            t_a4 = time(j,:, 4);
+            t_a5 = time(j,:, 5);
+            
+            ave_time(j,1) = mean(t_a1);
+            ave_time(j,2) = mean(t_a2);
+            ave_time(j,3) = mean(t_a3);
+            ave_time(j,4) = mean(t_a4);
+            ave_time(j,5) = mean(t_a5);
             
             %effin colors won't work, no idea why
-            plot (t,a1,'m.',...
-                 t,a2,'r.', ...
-                 t,a3,'g.',...'MarkerEdgeColor',[0 0 0], ...
-                 t,a4,'.', ...'Color',clr(4,:), ...
-                 t,a5,'k.'); % 'Color',clr(5,:));
+            plot (t,t_a1,'m.',...
+                 t,t_a2,'r.', ...
+                 t,t_a3,'g.',...'MarkerEdgeColor',[0 0 0], ...
+                 t,t_a4,'.b', ...'Color',clr(4,:), ...
+                 t,t_a5,'k.'); % 'Color',clr(5,:));
             set(gca, 'XLim', [0 map_iter+1], 'XTick' , 1:map_iter);
             xlabel('Map Number');
             ylabel('Time');
             legend(algo_type);
+            title('Time For Each Algorithms solution')
             hold on;
-        %end
-end    
+            
+            %% Mega Plot Std Dev
+            std_a1 = std_dev(j,:, 1);
+            std_a2 = std_dev(j,:, 2);
+            std_a3 = std_dev(j,:, 3);
+            std_a4 = std_dev(j,:, 4);
+            std_a5 = std_dev(j,:, 5);
+            
+            ave_std(j,1) = mean(std_a1);
+            ave_std(j,2) = mean(std_a2);
+            ave_std(j,3) = mean(std_a3);
+            ave_std(j,4) = mean(std_a4);
+            ave_std(j,5) = mean(std_a5);
+%             
+%             %effin colors won't work, no idea why
+%             plot (t,std_a1,'m.',...
+%                  t,std_a2,'r.', ...
+%                  t,std_a3,'g.',...'MarkerEdgeColor',[0 0 0], ...
+%                  t,std_a4,'.b', ...'Color',clr(4,:), ...
+%                  t,std_a5,'k.'); % 'Color',clr(5,:));
+%             set(gca, 'XLim', [0 map_iter+1], 'XTick' , 1:map_iter);
+%             xlabel('Map Number');
+%             ylabel('Standar Deviation of Time');
+%             legend(algo_type);
+%             title('Standard Deviaton of Time for Each Algorithm')
+%             hold on;
+end
+
+%get lowest average time and std deviation overall
+for b =1:num_algos
+    total_ave_time(b) = mean(ave_time(:,b));
+    total_ave_std(b) = mean(ave_std(:,b));
+end
