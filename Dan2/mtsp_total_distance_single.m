@@ -1,5 +1,5 @@
-function [opt_rte, smd, dist_history] = mtsp_std_dev(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
-% Cost Function is from from standard deviations
+function [opt_rte, min_dist, smd, dist_history, total_dist, cost] = mtsp_total_distance(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res)
+%Cost is only a function of total distance
 
 % MTSP_GA_MULTI_CH Multiple Traveling Salesmen Problem (M-TSP) Genetic Algorithm (GA) using multi-chromosome representation
 %   Finds a (near) optimal solution to a variation of the M-TSP by setting
@@ -41,40 +41,23 @@ function [opt_rte, smd, dist_history] = mtsp_std_dev(xy,dmat,salesmen,min_tour,m
 %     OPT_ITER (scalar int) is the number of iterations until the optimal solution has been found
 %	  OPT_TIME (scalar float) is the time in milliseconds until the optimal solution has been found
 %     DIST_HISTORY (float array) is the history of distances of best found solutions
+%
+% Authors: Andras Kiraly, Janos Abonyi
+% Email: kiralya@fmt.uni-pannon.hu
+% Release Date: 16/10/2014
+% The implementation is based on the work of Joseph Kirk: mtspf_ga
+%
+% *************************************************************************
+% --== Reference notice ==--
+% If you use this implementation in your work, please cite out paper:
+%
+% Andras Kiraly, Janos Abonyi: Redesign of the Supply of Mobile Mechanics 
+% based on a novel Genetic Optimization Algorithm using Google Maps API. 
+% Engineering Applications of Artificial Intelligence, 2014.
+% *************************************************************************
 
 
 %% Process Inputs and Initialize Defaults
-nargs = 11;
-% for k = nargin:nargs-1
-%     switch k
-%         case 0
-%             xy = 40*rand(40,2); 
-%         case 1
-%             N = size(xy,1); %map of locations
-%             a = meshgrid(1:N); %make a grid
-%             dmat = reshape(sqrt(sum((xy(a,:)-xy(a',:)).^2,2)),N,N);  %creates symetric cost matrix, the diagonol is zeroes
-%         case 2
-%             salesmen = 3;
-%         case 3
-%             min_tour = 5;
-% 		case 4
-%             max_tour = 100;
-% 		case 5
-%             tw = 0;
-%         case 6
-%             pop_size = 80;
-%         case 7
-%             num_iter = 500;
-%         case 8
-%             use_complex = 0;
-% 		case 9
-%             show_prog = 1;
-%         case 10
-%             show_res = 1;
-%         otherwise
-%     end
-% end
-
 merging_prob = 0.3;
 
 %% Verify Inputs
@@ -87,8 +70,6 @@ end
 n = N - 1; % Separate Start/End City
 
 % Sanity Checks
-salesmen = 3;
-% salesmen = max(1,min(n,round(real(salesmen(1)))));
 min_tour = max(1,min(floor(n/salesmen),round(real(min_tour(1)))));
 pop_size = max(8,8*ceil(pop_size(1)/8));
 num_iter = max(1,round(real(num_iter(1))));
@@ -136,11 +117,7 @@ dist_history    = zeros(1,num_iter);
 % vector is broken into a new chromosome, or esssentially another vector.
 pop = cell(1,pop_size);
 for k = 1: pop_size
-    pop{k}.ch{1} = pop_rte(k, 1:pop_brk(k,1));
-    for j=2:salesmen-1
-        pop{k}.ch{j} = pop_rte(k, pop_brk(k,j-1)+1:pop_brk(k,j));
-    end
-    pop{k}.ch{salesmen} = pop_rte(k, pop_brk(k,end)+1:n);
+    pop{k}.ch{1} = pop_rte;
 end
 % ----=== TARNSFORMATION --> multiple chromosome [END] ===----
 %%
@@ -155,22 +132,27 @@ for iter = 1:num_iter
             sman = pop{p}.ch{s};
 			d2 = 0;  %d2 is the total distance traveled by each salesman
 			if ~isempty(sman)
-                sd(s) = dmat(1,sman(1)) + tw;% Add Start Distance
-				
-                for k = 1:length(sman)-1
+                sd(s) = dmat(1,sman(1)) + tw;
+				d2 = d2 + dmat(1,sman(1)) + tw; % Add Start Distance
+				for k = 1:length(sman)-1
                     sd(s) = sd(s) + dmat(sman(k),sman(k+1)) + tw;
+ 					d2 = d2 + dmat(sman(k),sman(k+1)) + tw;
+                end
+                sd(s) = sd(s) + dmat(sman(end),1);
+				d2 = d2 + dmat(sman(end),1); % Add End Distance
+				
+                if (d2 > max_tour)
+					d2 = d2 + (d2 - max_tour) * penalty_rate;
                 end
                 
-                sd(s) = sd(s) + dmat(sman(end),1);% Add End Distance
-				     
             end
-
+            
+			d = d + d2;  %d is the total distance traveled by that population
         end
-        std_sd = std(sd);
+         std_sd = std(sd);
         ave_sd = mean(sd);
         total_dist(p) = sum(sd);
-        cost(p) = total_dist(p)+std_sd;
-
+        cost(p) = total_dist(p);
    end
 
     %% Find the Best Route in the Population
@@ -182,6 +164,31 @@ for iter = 1:num_iter
         opt_rte = pop{index}; % the best solution so far
         opt_time = cputime - start_time; % compute the elapsed time
         opt_iter = iter; % store the iteration number
+		
+        % The row bellow was only needed when the system tried to optimize
+        % for the best salesmen number, but we say fuck it
+        %salesmen = sum(cellfun(@(x) length(x), opt_rte.ch) > 0);  
+        
+%         if show_prog
+%             % Plot the Best Route
+%             figure(pfig);
+%             for s = 1:salesmen
+%                 rte = [1 opt_rte.ch{s} 1];
+%                 if dims == 3, 
+%                     plot3(xy(rte,1),xy(rte,2),xy(rte,3),'.-','Color',clr(s,:));
+%                 else
+%                     plot(xy(rte,1),xy(rte,2),'.-','Color',clr(s,:));
+%                 end
+%                 title(sprintf('Total Distance = %1.4f, Iteration = %d',min_dist,iter));
+%                 hold on
+%             end
+%             if dims == 3,
+%                 plot3(xy(1,1),xy(1,2),xy(1,3),'ko');
+%             else
+%                 plot(xy(1,1),xy(1,2),'ko'); 
+%             end
+%             hold off
+%         end
      end
 
     %% Genetic Algorithm Operators
@@ -318,6 +325,42 @@ for iter = 1:num_iter
 end
 %This is the end of the iterative process
 
+
+%% Plot Stuff
+% if show_res
+%     figure('Name','MTSPF_GA | Results','Numbertitle','off');    
+%     % Plots
+%     %Plot of City Locations
+%     subplot(3,1,1);
+%     if dims == 3, plot3(xy(:,1),xy(:,2),xy(:,3),'k.');
+%     else plot(xy(:,1),xy(:,2),'k.'); end
+%     title('City Locations');
+%        
+%     %Weird color Plot
+% %     subplot(2,2,2);
+% %     imagesc(dmat([1 opt_rte.ch{:}],[1 opt_rte.ch{:}]));
+% %     title('Distance Matrix');
+%     
+%     %Traveling Plot
+%     subplot(3,1,2);
+%     for s = 1:salesmen
+%         rte = [1 opt_rte.ch{s} 1];
+%         if dims == 3, plot3(xy(rte,1),xy(rte,2),xy(rte,3),'.-','Color',clr(s,:));
+%         else plot(xy(rte,1),xy(rte,2),'.-','Color',clr(s,:)); end
+%         title(sprintf('Total Distance = %1.4f',min_dist));
+%         hold on;
+%     end
+%     if dims == 3, plot3(xy(1,1),xy(1,2),xy(1,3),'ko');
+%     else plot(xy(1,1),xy(1,2),'ko'); end
+%     
+%     
+%     %Distance History Plot
+%     subplot(3,1,3);
+%     plot(dist_history,'b','LineWidth',2);
+%     title('Best Solution History');
+%     set(gca,'XLim',[0 num_iter+1],'YLim',[0 1.1*max([1 dist_history])]);
+% end
+
 %Calculate total distance of each salesmen
  for i = 1:salesmen
      sm_city_visit = cell2mat(opt_rte(1).ch(i));  %take the optimimimum route of salesmen i and save it as a vector
@@ -327,6 +370,17 @@ end
      end
      smd(i) = smd(i) + dmat(sm_city_visit(end),1);
  end
+         
+             
+
+% Return Outputs
+% if nargout
+%     varargout{1} = opt_rte;
+%     varargout{2} = min_dist;
+%     varargout{3} = opt_iter;
+%     varargout{4} = opt_time;
+%     varargout{5} = dist_history;
+% end
 
 %% Generate Random Set of Break Points
     function breaks = randbreaks()
