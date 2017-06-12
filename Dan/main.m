@@ -19,7 +19,7 @@ num_iter = 1000; %number of iterations within genetic algorithm
 use_complex = 0;
 show_prog = 1;
 show_res = 1;
-test_iter = 1; %number of times each GA is called
+test_iter = 2; %number of times each GA is called
 
 
 clr = [1 0 0; 0 0 1; 0.67 0 1; 0 1 0; 1 0.5 0];
@@ -32,11 +32,12 @@ for i = 1:test_iter
     [opt_rte_pd, smd_pd, dist_history_pd] =  mtsp_percent_diff(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
     [opt_rte_std, smd_std, dist_history_std] =  mtsp_std_dev(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
     [opt_rte_t, smd_t, dist_history_t] = mtsp_tour_2(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
+    [opt_rte, smd, dist_history] = mtsp_tnt(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);
 
     %[opt_rte_tnt, min_dist_tnt, smd_tnt, dist_history_tnt] =  mtsp_tnt(xy,dmat,salesmen,min_tour,max_tour,tw,pop_size,num_iter,use_complex,show_prog,show_res);  
     %% Calculating Time/Max Distance traveled by salesman
     
-    time(i,1) = min_dist_td;
+    time(i,1) = min_dist_td; % i is index of test of that specific map
     time(i,2) = max(smd_pd);
     time(i,3) = max(smd_std);
     
