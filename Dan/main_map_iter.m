@@ -15,16 +15,14 @@ num_iter = 80; %number of iterations within genetic algorithm
 use_complex = 0;
 show_prog = 1;
 show_res = 0;
-test_iter = 50; %number of times each GA is called
-map_iter = 5; %number of maps tested
+test_iter = 3; %number of times each GA is called
+map_iter = 3; %number of maps tested
 num_algos = 5; % number of algos
 clr = [1 0 0; 0 0 1; 0.67 0 1; 0 1 0; 1 0.5 0];
 algo_type = char('Single','Percent Difference', 'Std. Dev.', 'Longest Salesman Route', 'Longest Salesman and Total Route', ...
                  'Single Average', 'Percent Difference Ave.', 'Std. Dev. Ave.', 'Longest Salesman Route Ave.', 'Longest Salesman and Total Route Ave.');
 
-aMS = 6; %average Marker Size
-aLW = 1.4; %average line width
-sp = 0.5; %spacing factor for averages
+
 %% Parameters
 for j = 1:map_iter
     
@@ -71,7 +69,7 @@ for j = 1:map_iter
     end
     
     %% MEGA PLOT Time
-            t = j*ones(1,test_iter); %city visited
+%             t = j*ones(1,test_iter); %city visited
             t_a1 = time(j,:, 1);
             t_a2 = time(j,:, 2);
             t_a3 = time(j,:, 3);
@@ -86,40 +84,40 @@ for j = 1:map_iter
             ave_time(j,5) = mean(t_a5);
             
             %effin colors won't work, no idea why
-            plot (t,t_a1,'mo',...
-                 'MarkerSize', 3,...
-                 'MarkerFaceColor', 'm');
-            hold on;
-            plot (t,t_a2,'ro', ...
-                 'MarkerSize', 3,...
-                 'MarkerFaceColor', 'r');
-            hold on;
-            plot (t,t_a3,'go',...'MarkerEdgeColor',[0 0 0], ...
-                 'MarkerSize', 3,...
-                 'MarkerFaceColor', 'g');
-            hold on;
-            plot (t,t_a4,'bo', ...'Color',clr(4,:), ...
-                 'MarkerSize', 3,...
-                 'MarkerFaceColor', 'b');
-            hold on;
-            plot (t,t_a5,'ko',... % 'Color',clr(5,:));
-                 'MarkerSize', 3,...
-                 'MarkerFaceColor', 'k');
-            set(gca, 'XLim', [0 map_iter+1], 'XTick' , 1:map_iter);
-            xlabel('Map Number');
-            ylabel('Time');
-            
-            title('Time For Each Algorithms solution')
-            hold on;
+%             plot (t,t_a1,'mo',...
+%                  'MarkerSize', 3,...
+%                  'MarkerFaceColor', 'm');
+%             hold on;
+%             plot (t,t_a2,'ro', ...
+%                  'MarkerSize', 3,...
+%                  'MarkerFaceColor', 'r');
+%             hold on;
+%             plot (t,t_a3,'go',...'MarkerEdgeColor',[0 0 0], ...
+%                  'MarkerSize', 3,...
+%                  'MarkerFaceColor', 'g');
+%             hold on;
+%             plot (t,t_a4,'bo', ...'Color',clr(4,:), ...
+%                  'MarkerSize', 3,...
+%                  'MarkerFaceColor', 'b');
+%             hold on;
+%             plot (t,t_a5,'ko',... % 'Color',clr(5,:));
+%                  'MarkerSize', 3,...
+%                  'MarkerFaceColor', 'k');
+%             set(gca, 'XLim', [0 map_iter+1], 'XTick' , 1:map_iter);
+%             xlabel('Map Number');
+%             ylabel('Time');
+%             
+%             title('Time For Each Algorithms solution')
+%             hold on;
             %plot the averages as asterisks
             
-            plot (j,ave_time(j,1), 'ms','MarkerSize', aMS,'LineWidth',aLW);
-            plot (j+0.08*sp,ave_time(j,2), 'rs','MarkerSize', aMS,'LineWidth',aLW);
-            plot (j-0.08*sp,ave_time(j,3), 'gs','MarkerSize', aMS,'LineWidth',aLW);
-            plot (j+0.18*sp,ave_time(j,4), 'bs','MarkerSize', aMS,'LineWidth',aLW);
-            plot (j-0.18*sp,ave_time(j,5), 'ks','MarkerSize', aMS,'LineWidth',aLW);
-           legend(algo_type);
-            hold on;
+%             plot (j,ave_time(j,1), '-ms','MarkerSize', aMS,'LineWidth',aLW);
+%             plot (j+0.08*sp,ave_time(j,2), '-rs','MarkerSize', aMS,'LineWidth',aLW);
+%             plot (j-0.08*sp,ave_time(j,3), '-gs','MarkerSize', aMS,'LineWidth',aLW);
+%             plot (j+0.18*sp,ave_time(j,4), '-bs','MarkerSize', aMS,'LineWidth',aLW);
+%             plot (j-0.18*sp,ave_time(j,5), '-ks','MarkerSize', aMS,'LineWidth',aLW);
+%            legend(algo_type);
+%             hold on;
             
             %% Mega Plot Std Dev
             std_a1 = std_dev(j,:, 1);
@@ -147,6 +145,15 @@ for j = 1:map_iter
 %             title('Standard Deviaton of Time for Each Algorithm')
 %             hold on;
 end
+% maps = linspace(1,map_iter,map_iter);
+% plot (maps,ave_time(:,1), '-ms','MarkerSize', aMS,'LineWidth',aLW);
+% plot (maps+0.08*sp,ave_time(:,2), '-rs','MarkerSize', aMS,'LineWidth',aLW);
+% plot (maps-0.08*sp,ave_time(:,3), '-gs','MarkerSize', aMS,'LineWidth',aLW);
+% plot (maps+0.18*sp,ave_time(:,4), '-bs','MarkerSize', aMS,'LineWidth',aLW);
+% plot (maps-0.18*sp,ave_time(:,5), '-ks','MarkerSize', aMS,'LineWidth',aLW);
+% legend(algo_type);
+% hold on;
+
 
 %get lowest average time and std deviation overall
 for b =1:num_algos

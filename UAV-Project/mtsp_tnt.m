@@ -75,9 +75,9 @@ for k = nargin:nargs-1
         case 2
             salesmen = 3;
         case 3
-            min_tour = 5;
+            min_tour = 1;
 		case 4
-            max_tour = 100;
+            max_tour = 1000;
 		case 5
             tw = 0;
         case 6
@@ -250,9 +250,9 @@ for iter = 1:num_iter
                 %going, which makes the display a little dizzying
                 clrs = [clr_3;clr_2;clr_1];
                 if change_clrs
-                    if lt_i(index) == 1
+                    if opt_lt_i == 1
                         clrs = [clr_1;clr_2;clr_3];
-                    elseif lt_i(index) == 2
+                    elseif opt_lt_i == 2
                         clrs = [clr_2;clr_1;clr_3];
                     end
                 end
@@ -270,9 +270,12 @@ for iter = 1:num_iter
                 plot(xy(1,1),xy(1,2),'ko'); 
             end
             if mod(num_iter,50) == 0 
-                pause(0.1)
+                pause(0.1);
             end
-            hold off
+            hold off;
+            if iter == 1
+                pause(10);
+            end
         end
     end
     soln_history{iter} = opt_rte;
@@ -448,9 +451,9 @@ if show_res
     if dims == 3, plot3(xy(:,1),xy(:,2),xy(:,3),'k.');
     else plot(xy(:,1),xy(:,2),'k.'); end
     title('Inspection Locations');
-    subplot(2,2,2);
-    imagesc(dmat([1 opt_rte.ch{:}],[1 opt_rte.ch{:}]));
-    title('Distance Matrix');
+%     subplot(2,2,2);
+%     imagesc(dmat([1 opt_rte.ch{:}],[1 opt_rte.ch{:}]));
+%     title('Distance Matrix');
     subplot(2,2,3);
     
     %make the longest tour red
